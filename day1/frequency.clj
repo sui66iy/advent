@@ -19,11 +19,15 @@
         length (count input)]
     (loop [idx 0
            current 0
-           seen (set '(0))]
+           seen #{0}]
       (let [freq (+ (nth input (mod idx length)) current)]
         (if (contains? seen freq)
           freq
           (recur (+ idx 1)
                  freq
                  (conj seen freq)))))))
+
+(do
+  (println (compute-frequency "input.txt"))
+  (println (find-repeats "input.txt")))
 
