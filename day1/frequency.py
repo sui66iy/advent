@@ -21,7 +21,7 @@ def find_repeats(input_fn):
     return
 
 def main():
-    #print(compute_frequency('input.txt'))
+    print(compute_frequency('input.txt'))
     print(find_repeats('input.txt'))
     
 if __name__ == '__main__':
