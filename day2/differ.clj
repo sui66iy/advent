@@ -1,4 +1,6 @@
 
+(require '[clojure.java.io :as io])
+
 (defn index-substring
   [s idx]
   (str (subs s 0 idx) (subs s (+ idx 1))))
