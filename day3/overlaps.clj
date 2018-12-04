@@ -34,6 +34,8 @@
     (inc x)))
 
 (defn coord-counts
+  "Construct a map of coordinates to the number of boxes that
+  contain that coordinate"
   [the-boxes]
   (loop [coord-count {}
          boxes the-boxes]
@@ -49,14 +51,18 @@
          (rest boxes))))))
 
 (defn count-overlap-inches
+  "Count the number of coordinates occupied by at least two
+  boxes"
   [boxes]
   (count (filter #(>= % 2) (vals (coord-counts boxes)))))
 
 (defn non-overlapping?
+  "Check to see if a box overlaps with any others"
   [box coord-count]
   (every? #(= (coord-count %) 1) (all-coords-in-box box)))
 
 (defn find-nonoverlapping-boxes
+  "Find any boxes that are non-overlapping"
   [boxes]
   (let [coord-count (coord-counts boxes)]
     (filter #(not (nil? %))
