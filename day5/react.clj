@@ -13,34 +13,35 @@
 (defn react
   [s]
   (loop
-      [front (subs s 0 1)
-       back (subs s 1)]
+      [front (subvec s 0 1)
+       back (subvec s 1)]
     (let [b (first back)]
       (cond
         (nil? b)
-        (str front back)
+        front
         (reactable? (last front) b)
-        (str (subs front 0 (- (count front) 1))
-             (subs back 1))
+        (into (subvec front 0 (- (count front) 1))
+              (subvec back 1))
         :else
-        (recur (str front b)
-               (subs back 1))))))
+        (recur (conj front b)
+               (subvec back 1))))))
 
 (defn react-until-fixed
   [s]
   (loop
       [prior s]
     (let
-       [current (react prior)]
-      (if (= prior current)
+        [current (react prior)]
+      (println (count current))
+      (if (= (count prior) (count current))
         current
         (recur current)))))
   
-(def test-main "dabAcCaCBAcCcaDA")
+(def test-main (into [] "dabAcCaCBAcCcaDA"))
 
 (defn read-file
   [filename]
-  (slurp filename))
+  (into [] (slurp filename)))
 
 (defn main
   [filename]
