@@ -1,8 +1,16 @@
 
-(require '[clojure.string :as string])
+; Some optimizations:
+; Before keeping start-idx O(n^2) too slow to use
+; Base O(n) "Elapsed time: 317442.809807 msecs"
+; RBB vectors "Elapsed time: 17984.571612 msecs"
+; Type hints "Elapsed time: 17574.831288 msecs"
 
-(defn reactable?
-  [x y]
+(require '[clojure.string :as string])
+(require '[clojure.core.rrb-vector :as fv])
+
+(defn ^boolean reactable?
+  [^Character x
+   ^Character y]
   (and (not (= x y))
        (= (string/lower-case x)
           (string/lower-case y))))
@@ -10,20 +18,20 @@
 (defn react
   [s start-idx]
   (loop
-      [front (subvec s 0 (+ start-idx 1))
-       back (subvec s (+ start-idx 1))
+      [front (fv/subvec s 0 (+ start-idx 1))
+       back (fv/subvec s (+ start-idx 1))
        idx start-idx]
     (let [b (first back)]
       (cond
         (nil? b)
         [front (max 0 (- idx 1))]
         (reactable? (last front) b)
-        [(into (subvec front 0 (- (count front) 1))
-               (subvec back 1))
+        [(fv/catvec (fv/subvec front 0 (- (count front) 1))
+                    (fv/subvec back 1))
          (max 0 (- idx 1))]
         :else
         (recur (conj front b)
-               (subvec back 1)
+               (fv/subvec back 1)
                (+ idx 1))))))
 
 (defn react-until-fixed
