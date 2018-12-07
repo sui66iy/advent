@@ -59,18 +59,17 @@
                               (frequencies (closest-coords xys))))))))
 
 (defn total-distance
-  [xy xys]
-  (reduce + (map (partial manhattan-distance xy) xys)))
-
-;; we could make this more efficient by adding an early stopping condition
-;; to total-distance based on the dist provided to count-coords-near.  Since
-;; we know that we only care about distances less than dist, once we have
-;; convinced ourselves total-distance is greater than that we can stop!
+  [xy xys early-stop]
+  (reduce (fn [total dist]
+            (if (> total early-stop)
+              (reduced total)
+              (+ total dist)))
+          (map (partial manhattan-distance xy) xys)))
 
 (defn count-coords-near
   [xys dist]
   (let [coords (all-coords xys)]
-    (count (filter #(< % dist) (pmap #(total-distance % xys) coords)))))
+    (count (filter #(< % dist) (pmap #(total-distance % xys dist) coords)))))
 
 (def test-main [[1, 1]
                 [1, 6]
