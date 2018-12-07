@@ -38,7 +38,7 @@
   [xys]
   (let
       [all-xys (all-coords xys)]
-    (map (fn [xy] (min-distance xy xys)) all-xys)))
+    (pmap (fn [xy] (min-distance xy xys)) all-xys)))
 
 (defn largest-area
   "Calculate largest non-infinite area"
