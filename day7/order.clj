@@ -71,3 +71,81 @@
   [filename]
   (with-open [rdr (io/reader filename)]  
     (apply str (compute-order (make-deps (line-seq rdr))))))
+
+;; Part 2
+
+(def main-step-time 60)
+
+(def test-step-time 0)
+
+(def step-time main-step-time)
+
+(def test-n-workers 2)
+
+(def main-n-workers 5)
+
+(def n-workers main-n-workers)
+
+(def step-times (into {} (map vector
+                              (map str "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+                              (range 1 27))))
+
+(defn get-ready
+  [step]
+  (if (nil? step)
+    nil
+    [step (+ (step-times step) step-time)]))
+
+(defn update-workers
+  [deps
+   the-workers
+   the-ready
+   the-done]
+  (loop [idx 0
+         workers the-workers
+         ready the-ready
+         done the-done]
+    (if (= idx (count workers))
+      [workers ready done]
+      (let [w (nth workers idx)]
+        (cond (nil? w) ; worker is empty; try to get some work for it!
+              (recur (+ idx 1)
+                     (assoc workers idx (get-ready (first ready)))
+                     (disj ready (first ready))
+                     done)
+              (= (second w) 1) ; worker is done; add work to done and get some new work!
+              (let [new-done (conj done (first w))
+                    new-ready (next-ready deps ready (first w) (set new-done))]
+                (recur (+ idx 1)
+                       (assoc workers idx (get-ready (first new-ready)))
+                       (disj new-ready (first new-ready))                     
+                       new-done))
+              :else ; work in progress; update the work
+              (recur (+ idx 1)
+                     (assoc workers idx [(first w) (- (second w) 1)])
+                     ready
+                     done))))))
+
+(defn compute-order2
+  [deps]
+  (loop [ready (initial-ready deps)
+         done []
+         sec -1
+         workers (into [] (take n-workers (repeat nil)))]
+    (if (and (empty? ready)
+             (every? nil? (set workers)))
+      [sec done]
+      (let [[updated-workers updated-ready updated-done]
+            (update-workers deps workers ready done)]
+        (recur updated-ready
+               updated-done
+               (+ sec 1)
+               updated-workers)))))
+          
+(defn test2 [] (compute-order2 (make-deps test-main)))
+
+(defn main2
+  [filename]
+  (with-open [rdr (io/reader filename)]
+    (let [[secs steps] (compute-order2 (make-deps (line-seq rdr)))]
+      [secs (apply str steps)])))
